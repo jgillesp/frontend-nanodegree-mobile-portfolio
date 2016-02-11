@@ -451,8 +451,12 @@ var resizePizzas = function(size) {
   // Iterates through pizza elements on the page and changes their widths
   //requestAnimationFrame does allow us to postpone DOM writes to greatly improve performance
   function changePizzaSizes(size) {
+    // batch our DOM updates into the next animation frame
     requestAnimationFrame(function() {
+      // only query the DOM once, don't interleave reads with writes in the for loop!
       var pizzas = document.querySelectorAll(".randomPizzaContainer");
+      // only need to call this once. doing it in the loop causes a DOM read between writes
+      // leading to layout thrashing.
       var dx = determineDx(pizzas[0], size);
       var newwidth = (pizzas[0].offsetWidth + dx) + 'px';
       for (var i = 0; i < pizzas.length; i++) {
@@ -505,10 +509,11 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
 function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
-  //Changed so that read is outside of the loop.
+  //Changed so that DOM read is outside of the loop
   var items = document.querySelectorAll('.mover');
   var scrollTop = (document.body.scrollTop / 1250);
-  //requestAnimationFrame does allow us to postpone DOM writes to greatly improve performance
+  // requestAnimationFrame allows us to batch DOM writes during the next frame to greatly improve performance
+  // see  `http://wilsonpage.co.uk/preventing-layout-thrashing/`
   window.requestAnimationFrame(function() {
     for (var i = 0; i < items.length; i++) {
       var phase = Math.sin(scrollTop + (i % 5));
