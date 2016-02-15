@@ -516,8 +516,16 @@ function updatePositions() {
   // requestAnimationFrame allows us to batch DOM writes during the next frame to greatly improve performance
   // see  `http://wilsonpage.co.uk/preventing-layout-thrashing/`
   window.requestAnimationFrame(function() {
+    // pre-calculate the five phases we need to save on
+    // expensive calls to Math.sin inside the for loop
+    var phases = [ Math.sin(scrollTop),
+      Math.sin(scrollTop + 1),
+      Math.sin(scrollTop + 2),
+      Math.sin(scrollTop + 3),
+      Math.sin(scrollTop + 4) ];
+
     for (var i = 0; i < items.length; i++) {
-      var phase = Math.sin(scrollTop + (i % 5));
+      var phase = phases[i % 5];
       var it = items[i];
       var left = it.basicLeft;
       it.style.left = left + 100 * phase + 'px';
