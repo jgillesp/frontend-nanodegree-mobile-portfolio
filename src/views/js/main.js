@@ -403,16 +403,17 @@ var resizePizzas = function(size) {
   window.performance.mark("mark_start_resize");   // User Timing API function
 
   // Changes the value for the size of the pizza above the slider
-  function changeSliderLabel(size) {
+
+function changeSliderLabel(size) {
     switch(size) {
       case "1":
-        document.querySelector("#pizzaSize").innerHTML = "Small";
+        pizzaSizeElement.innerHTML = "Small";
         return;
       case "2":
-        document.querySelector("#pizzaSize").innerHTML = "Medium";
+        pizzaSizeElement.innerHTML = "Medium";
         return;
       case "3":
-        document.querySelector("#pizzaSize").innerHTML = "Large";
+        pizzaSizeElement.innerHTML = "Large";
         return;
       default:
         console.log("bug in changeSliderLabel");
@@ -454,12 +455,12 @@ var resizePizzas = function(size) {
     // batch our DOM updates into the next animation frame
     requestAnimationFrame(function() {
       // only query the DOM once, don't interleave reads with writes in the for loop!
-      var pizzas = document.querySelectorAll(".randomPizzaContainer");
+      var pizzas = document.getElementsByClassName(".randomPizzaContainer");
       // only need to call this once. doing it in the loop causes a DOM read between writes
       // leading to layout thrashing.
       var dx = determineDx(pizzas[0], size);
       var newwidth = (pizzas[0].offsetWidth + dx) + 'px';
-      for (var i = 0; i < pizzas.length; i++) {
+      for (var i = 0, len = pizzas.length; i < len; i++) {
         pizzas[i].style.width = newwidth;
       }
     });
@@ -477,8 +478,8 @@ var resizePizzas = function(size) {
 window.performance.mark("mark_start_generating"); // collect timing data
 
 // This for-loop actually creates and appends all of the pizzas when the page loads
+var pizzasDiv = document.getElementById("randomPizzas");
 for (var i = 2; i < 100; i++) {
-  var pizzasDiv = document.getElementById("randomPizzas");
   pizzasDiv.appendChild(pizzaElementGenerator(i));
 }
 
@@ -515,8 +516,16 @@ function updatePositions() {
   // requestAnimationFrame allows us to batch DOM writes during the next frame to greatly improve performance
   // see  `http://wilsonpage.co.uk/preventing-layout-thrashing/`
   window.requestAnimationFrame(function() {
+    // pre-calculate the five phases we need to save on
+    // expensive calls to Math.sin inside the for loop
+    var phases = [ Math.sin(scrollTop),
+      Math.sin(scrollTop + 1),
+      Math.sin(scrollTop + 2),
+      Math.sin(scrollTop + 3),
+      Math.sin(scrollTop + 4) ];
+
     for (var i = 0; i < items.length; i++) {
-      var phase = Math.sin(scrollTop + (i % 5));
+      var phase = phases[i % 5];
       var it = items[i];
       var left = it.basicLeft;
       it.style.left = left + 100 * phase + 'px';
@@ -536,19 +545,33 @@ function updatePositions() {
 // runs updatePositions on scroll
 window.addEventListener('scroll', updatePositions);
 
-// Generates the sliding pizzas when the page loads.
-document.addEventListener('DOMContentLoaded', function() {
-  var cols = 8;
+function getViewDimensions() {
+  return {width: window.screen.width, height: window.screen.height};
+}
+
+function updateBackgroundPizzas() {
+  // Optimized this to only create enough background pizzas to
+  // fill the user's current screen.
   var s = 256;
-  for (var i = 0; i < 200; i++) {
+  var dimensions = getViewDimensions();
+  var numCols = Math.ceil(dimensions.width / s);
+  var numRows = Math.ceil(dimensions.height / s);
+  var numCells = numCols*numRows;
+  var movingPizzasElement = document.getElementById("movingPizzas1");
+  for (var i = 0; i < numCells; i++) {
     var elem = document.createElement('img');
     elem.className = 'mover';
     elem.src = "images/pizza.png";
     elem.style.height = "100px";
     elem.style.width = "73.333px";
-    elem.basicLeft = (i % cols) * s;
-    elem.style.top = (Math.floor(i / cols) * s) + 'px';
-    document.querySelector("#movingPizzas1").appendChild(elem);
+    elem.basicLeft = (i % numCols) * s;
+    elem.style.top = (Math.floor(i / numCols) * s) + 'px';
+    movingPizzasElement.appendChild(elem);
   }
   updatePositions();
+}
+
+// Generates the sliding pizzas when the page loads.
+document.addEventListener('DOMContentLoaded', function() {
+  updateBackgroundPizzas();
 });
