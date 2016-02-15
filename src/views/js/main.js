@@ -405,6 +405,7 @@ var resizePizzas = function(size) {
   // Changes the value for the size of the pizza above the slider
 
 function changeSliderLabel(size) {
+    var pizzaSizeElement = document.getElementById('pizzaSize');
     switch(size) {
       case "1":
         pizzaSizeElement.innerHTML = "Small";
@@ -455,7 +456,7 @@ function changeSliderLabel(size) {
     // batch our DOM updates into the next animation frame
     requestAnimationFrame(function() {
       // only query the DOM once, don't interleave reads with writes in the for loop!
-      var pizzas = document.getElementsByClassName(".randomPizzaContainer");
+      var pizzas = document.getElementsByClassName("randomPizzaContainer");
       // only need to call this once. doing it in the loop causes a DOM read between writes
       // leading to layout thrashing.
       var dx = determineDx(pizzas[0], size);
