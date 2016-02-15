@@ -19,3 +19,8 @@ To run
 Then visit `http://localhost:8080` in your favorite browser!
 
 You can check out the deployed version [on github pages here.](http://jgillesp.github.io/frontend-nanodegree-mobile-portfolio)
+
+## Optimizations
+
+* Bullet one
+* Bullet two
