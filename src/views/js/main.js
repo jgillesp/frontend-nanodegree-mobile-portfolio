@@ -460,7 +460,7 @@ function changeSliderLabel(size) {
       // leading to layout thrashing.
       var dx = determineDx(pizzas[0], size);
       var newwidth = (pizzas[0].offsetWidth + dx) + 'px';
-      for (var i = 0; i < pizzas.length; i++) {
+      for (var i = 0, len = pizzas.length; i < len; i++) {
         pizzas[i].style.width = newwidth;
       }
     });
